@@ -1,4 +1,3 @@
-
 class TuringMachine:
     def __init__(self, file):
         f = open(file, "r")
@@ -60,22 +59,40 @@ class TuringMachine:
                 dic[i.__name__] = {i.__in__: [i.__nstate__, i.__out__, i.__d__]}
             else: 
                 dic[i.__name__][i.__in__] = [i.__nstate__, i.__out__, i.__d__]
-        print(dic.keys())
-        for i in dic.keys():
-            for j in dic[i].keys():
-                print("Key: " + str(i) + " has value of " + str(j) + " " + str(dic[i][j]) )
         return dic
 
     def execute(self):
-        _finished = False 
+        _finished = False
         index = 0
-         
+        c_state = None
+        tape = self.__tape__
+        dic = self.create_dic()
+        if tape[0] in dic["qinit"].keys():
+            c_state = dic["qinit"][tape[0]]
         while(_finished != True):
-            print("Nice cock")
-
-
-
-
+            #first check if machine didnt finish algorithm
+            if c_state[0] != "fin":
+                #overwrite value
+                tape[index] = c_state[1]
+                #move header
+                if c_state[2] == ">":
+                    if index + 1 >= len(tape):
+                        tape.append("#")
+                    index = index + 1
+                else:
+                    if index - 1 <= 0:
+                        tape.insert(0, "#")
+                    index = index - 1
+                #go to next state
+                if c_state[0] in dic.keys():
+                    if tape[index] in dic[c_state[0]].keys():
+                        c_state = dic[c_state[0]][tape[index]]
+                    else: raise NotImplementedError("Err14: Tried to reach state that doesn't exists!")
+                else: raise NotImplementedError("Err13: Tried to reach state that doesn't exists!")
+            else: _finished = True
+        print(tape)
+        return tape
+            
 
 class State:
     def __init__(self, name, input, state_to, output, dir):
@@ -89,11 +106,8 @@ class State:
         return self.__d__
 
 if __name__ == "__main__":
-    T = TuringMachine("69.txt")
-    d = { "A": 1, "B": 2 }
-
-    #print(T.__alphabet__)
-    T.create_dic()
+    T = TuringMachine("binary_negation.txt")
+    a = T.execute()
 
 
 """
