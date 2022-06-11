@@ -81,9 +81,10 @@ class TuringMachine:
                         tape.append("#")
                     index = index + 1
                 else:
-                    if index - 1 <= 0:
+                    if index - 1 < 0:
                         tape.insert(0, "#")
-                    index = index - 1
+                        index = 0
+                    else: index = index-1
                 #go to next state
                 if c_state[0] in dic.keys():
                     if tape[index] in dic[c_state[0]].keys():
@@ -110,18 +111,18 @@ class StateGenerator:
     def __init__(self, file):
         self.__file__ = file
     
-    def gen_states(self, state1, state2, r ,dir):
+    def gen_states(self, state1, state2, r ,dir, incr=1):
         f = open(self.__file__, "a")
-        for i in range(r[0], r[1]):
+        for i in range(r[0], r[1], incr):
             output = [state1, str(i), state2, str(i), dir]
             output = ", ".join(output)
             f.write(output + "\n")
         f.close()
 if __name__ == "__main__":
-    #T = TuringMachine("binary_negation.txt")
-    #a = T.execute()
-    x = StateGenerator("output.txt")
-    x.gen_states("qinit", "qinit", [0,10] , ">")
+    T = TuringMachine("binToDec.txt")
+    a = T.execute()
+    #x = StateGenerator("output.txt")
+    #x.gen_states("back", "back", [1,10] , ">")
 
 
 """
