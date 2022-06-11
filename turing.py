@@ -4,6 +4,7 @@ class TuringMachine:
         self.__alphabet__ = self.init_alphabet(f)
         self.__tape__ = self.init_tape(f)
         self.__states__ = self.init_states(f)
+        f.close()
     
     def init_alphabet(self, f):
         alphabet = list(f.readline())
@@ -105,9 +106,22 @@ class State:
     def move(self):
         return self.__d__
 
+class StateGenerator:
+    def __init__(self, file):
+        self.__file__ = file
+    
+    def gen_states(self, state1, state2, r ,dir):
+        f = open(self.__file__, "a")
+        for i in range(r[0], r[1]):
+            output = [state1, str(i), state2, str(i), dir]
+            output = ", ".join(output)
+            f.write(output + "\n")
+        f.close()
 if __name__ == "__main__":
-    T = TuringMachine("binary_negation.txt")
-    a = T.execute()
+    #T = TuringMachine("binary_negation.txt")
+    #a = T.execute()
+    x = StateGenerator("output.txt")
+    x.gen_states("qinit", "qinit", [0,10] , ">")
 
 
 """
