@@ -92,10 +92,10 @@ class TuringMachine:
                     else: raise NotImplementedError("Err14: Tried to reach state that doesn't exists!")
                 else: raise NotImplementedError("Err13: Tried to reach state that doesn't exists!")
             else: _finished = True
+        print(index)
         print(tape)
         return tape
             
-
 class State:
     def __init__(self, name, input, state_to, output, dir):
         self.__name__ = name
@@ -113,16 +113,21 @@ class StateGenerator:
     
     def gen_states(self, state1, state2, r ,dir, incr=1):
         f = open(self.__file__, "a")
+        a =["A", "B", "C", "D", "E", "F"]
         for i in range(r[0], r[1], incr):
-            output = [state1, str(i), state2, str(i), dir]
-            output = ", ".join(output)
-            f.write(output + "\n")
+            if i <10:
+                output = [state1, str(i), state2, str(i), dir]
+                output = ", ".join(output)
+                f.write(output + "\n")
+            else:
+                output = [state1, a[i-10], state2, a[i-10], dir]
+                output = ", ".join(output)
+                f.write(output + "\n")
         f.close()
+
 if __name__ == "__main__":
-    T = TuringMachine("binToDec.txt")
+    T = TuringMachine("binToHex.txt")
     a = T.execute()
-    #x = StateGenerator("output.txt")
-    #x.gen_states("back", "back", [1,10] , ">")
 
 
 """
