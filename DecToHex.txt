@@ -1,5 +1,7 @@
 0 1 2 3 4 5 6 7 8 9 A B C D E F !
 2137
+//Start by checking wheter input is a dec number 
+
 qinit, 0, qinit, 0, >
 qinit, 1, qinit, 1, >
 qinit, 2, qinit, 2, >
@@ -10,12 +12,18 @@ qinit, 6, qinit, 6, >
 qinit, 7, qinit, 7, >
 qinit, 8, qinit, 8, >
 qinit, 9, qinit, 9, >
+//Start of dec -> bin translation
+//Assuming number is even
 qinit, #, halve, 0, <
+
 halve, 0, halve, 0, <
 halve, 2, halve, 1, <
 halve, 4, halve, 2, <
 halve, 6, halve, 3, <
 halve, 8, halve, 4, <
+
+//For odd numbers we add 0.5 to the right 
+
 halve, 1, oddHalve, 0, >
 halve, 3, oddHalve, 1, >
 halve, 5, oddHalve, 2, >
@@ -52,6 +60,8 @@ back, 6, back, 6, >
 back, 7, back, 7, >
 back, 8, back, 8, >
 back, 9, back, 9, >
+
+//Start of getting one bit of number
 back, #, res, #, <
 res, 0, res0, #, >
 res0, #, passRes0, #, >
@@ -65,9 +75,16 @@ passRes1, 1, passRes1, 1, >
 passRes1, #, pass, 1, <
 pass, 0, pass, 0, <
 pass, 1, pass, 1, <
+
+//Start of getting another bit 
 pass, #, passEnd, #, <
 passEnd, #, halve, 0, <
+
+//Start of bin -> hex translation
 res, #, binStart, #, >
+
+//Filling up bytes
+
 binStart, #, binStart, #, >
 binStart, 1, binCount2, 1, >
 binStart, 0, binCount2, 0, >
@@ -82,9 +99,14 @@ binCount3, #, binCount4, 0, >
 binCount4, 0, binCount1, 0, >
 binCount4, 1, binCount1, 1, >
 binCount4, #, binCount1, 0, >
+
+//Finding first bit of number
 binCount1, #, goBack, #, <
 goBack, 0, goBack, 0, <
 goBack, 1, goBack, 1, <
+
+//Initialising binaryDecisionTree
+
 goBack, #, binHexInit, !, >
 binHexInit, 0, D0, #, >
 binHexInit, 1, D1, #, >
@@ -117,6 +139,8 @@ D001, 1, hexResC, !, <
 D001, 0, hexRes4, !, <
 D000, 1, hexRes8, !, <
 D000, 0, hexRes0, !, <
+
+//Start of writting of result
 hexRes0, #, hexRes0, #, <
 hexRes0, !, newBeg, 0, <
 hexRes1, #, hexRes1, #, <
@@ -150,6 +174,8 @@ hexResE, !, newBeg, E, <
 hexResF, #, hexResF, #, <
 hexResF, !, newBeg, F, <
 newBeg, #, findBin, !, >
+
+//Looking for binary bytes start
 findBin, 0, findBin, 0, >
 findBin, 1, findBin, 1, >
 findBin, 2, findBin, 2, >
@@ -167,7 +193,11 @@ findBin, D, findBin, D, >
 findBin, E, findBin, E, >
 findBin, F, findBin, F, >
 findBin, #, findBin, #, >
+
+//Repeating bin -> hex translation for another byte
 findBin, !, binHexInit, #, >
+
+//Rest of passing states for finding ! to write down result 
 hexRes0, 0, hexRes0, 0, <
 hexRes0, 1, hexRes0, 1, <
 hexRes0, 2, hexRes0, 2, <
