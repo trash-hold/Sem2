@@ -97,9 +97,7 @@ def Kruskal(G):
     edges = A.__edges__
     edges.sort(key = weight)
     tree = list()
-    #check if that necessesary, try tree.append(set())
     tree.append({edges[0].__from__, edges[0].__to__})
-    #tree.append(set())
     new_edges = list()
     new_edges.append(Edge(edges[0].__weight__, edges[0].__from__, edges[0].__to__ ))
 
@@ -130,6 +128,54 @@ def Kruskal(G):
     for j in new_edges:
         kruskalGraph.create_connection(j.__weight__, j.__from__, j.__to__)
     return kruskalGraph
+
+def Dijkstra(G, b):
+    edges = G.__edges__
+    nodes = [i.__name__ for i in G.__nodes__]
+    queue = {x: None for x in nodes}
+    queue[b] = 0
+    checked = []
+    #Keys are the destination nodes values are node from
+    path = {}
+    new_edges = []
+    distance = {}
+    #distance from Node1 to Node2
+    for edge in edges:
+        if distance.get(edge.__from__) == None:
+            distance[edge.__from__] = {edge.__to__: edge.__weight__}
+        else:
+            distance[edge.__from__][edge.__to__] = edge.__weight__
+
+    while set(checked) != set(nodes):
+        current = findMin(queue, checked)
+        if distance.get(current) == None:
+            checked.append(current) 
+            continue
+        for i in distance[current]:
+            if queue[i] == None:
+                queue[i] = distance[current][i] + queue[current]
+                path[i] = current
+            elif distance[current][i] + queue[current] < queue[i]:
+                queue[i] = distance[current][i] + queue[current]
+                path[i] = current
+        checked.append(current) 
+        
+    print(queue)
+    print(path)
+
+def findMin(queue, checked):
+    min = None
+    key = None
+    for i in set(queue) - set(checked):
+        if min == None:
+            min = queue[i]
+            key = i
+        elif queue[i] != None:
+            if queue[i] < min:
+                min = queue[i] 
+                key = i
+    return key
+
 
 if __name__ == "__main__":
     """
@@ -164,13 +210,19 @@ if __name__ == "__main__":
     G.create_connection(5, "E","C")
     G.create_connection(9, "E","G")
     G.create_connection(11, "F","G")
-    print(G.__connections__)
+    #print(G.__connections__)
 
-    B = Kruskal(G)
-    print("Kruskal:")
-    print(B.__connections__)
-    print("Edges:")
-    print([x.__name__ for x in B.__edges__])
+    if False:
+        B = Kruskal(G)
+        print("Kruskal:")
+        print(B.__connections__)
+        print("Edges:")
+        print([x.__name__ for x in B.__edges__])
+
+    if True:
+        Dijkstra(G, "A")
+
+    #findMin({"A": 10, "B": 1, "C": 2}, ["B"])
 
 #1. stworzenie grafu który ma takie same krawędzie, węzły ale nie połączenia 
 #2. posortowanie krawędzi 
