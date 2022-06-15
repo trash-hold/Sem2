@@ -2,6 +2,8 @@ from dataclasses import asdict
 from graph import Graph
 import numpy as np
 
+#Functions for perfomring graph algorithms are named as: Kruskal, Dijkstra, FordFulkerson
+
 class Edge:
     def __init__(self, weight, _from, _to):
         if type(weight) != int:
@@ -96,6 +98,7 @@ def Kruskal(G):
     A = G
     edges = A.__edges__
     edges.sort(key = weight)
+    #Created priority queue
     tree = list()
     tree.append({edges[0].__from__, edges[0].__to__})
     new_edges = list()
@@ -129,15 +132,14 @@ def Kruskal(G):
         kruskalGraph.create_connection(j.__weight__, j.__from__, j.__to__)
     return kruskalGraph
 
-def Dijkstra(G, b):
+def Dijkstra(G, base_node):
     edges = G.__edges__
     nodes = [i.__name__ for i in G.__nodes__]
     queue = {x: None for x in nodes}
-    queue[b] = 0
+    queue[base_node] = 0
     checked = []
     #Keys are the destination nodes values are node from
     path = {}
-    new_edges = []
     distance = {}
     #distance from Node1 to Node2
     for edge in edges:
@@ -159,7 +161,7 @@ def Dijkstra(G, b):
                 queue[i] = distance[current][i] + queue[current]
                 path[i] = current
         checked.append(current) 
-        
+
     print(queue)
     print(path)
 
@@ -176,29 +178,117 @@ def findMin(queue, checked):
                 key = i
     return key
 
+def FordFulkerson(G, start_node, end_node, directed = False):
+    edges = G.__edges__
+    flow = {x.__name__: 0 for x in edges}
+    max_flow = {x.__name__: x.__weight__ for x in edges}
+    full = []
+    connections = {}
+    for x in edges:
+        if connections.get(x.__from__) == None:
+            connections[x.__from__] = [x.__to__]
+        else:
+            connections[x.__from__].append(x.__to__)
+        if directed == False:
+            if connections.get(x.__to__) == None:
+                connections[x.__to__] = [x.__from__]
+            elif connections:
+                connections[x.__to__].append(x.__from__)
+
+    path = augmenting_paths(G, start_node, end_node, full)
+    #while paths:
+    while path != None:
+        minimum = None
+        edges_names = [str(path[i]) + str(path[i+1]) for i in range(0, len(path)-1)]
+        for i in edges_names:
+            i_flow = max_flow[i] - flow[i]
+            if minimum == None:
+                minimum = i_flow
+            elif minimum > i_flow and i_flow > 0: minimum = i_flow
+        if minimum <= 0:
+            for i in edges_names:
+                full.append(i)
+            path = augmenting_paths(G, start_node, end_node, full)
+            continue
+        for i in edges_names:
+            flow[i] = flow[i] + minimum
+    print(flow)
+
+        
+def augmenting_paths(G, start_node, end_node, full, directed = False):
+    #Using BFS algorithm to find all paths between start and end node
+    edges = G.__edges__
+    connections = {}
+    for x in edges:
+        if x.__name__ in full:
+                continue
+        
+        if connections.get(x.__from__) == None:
+            connections[x.__from__] = [x.__to__]
+        else:
+            connections[x.__from__].append(x.__to__)
+
+        if directed == False:
+            if connections.get(x.__to__) == None:
+                connections[x.__to__] = [x.__from__]
+            else:
+                connections[x.__to__].append(x.__from__)
+    
+    nodes = [x.__name__ for x in G.__nodes__]        
+    visited = []
+    paths = []
+    if start_node not in nodes or end_node not in nodes:
+        raise NotImplementedError("BFS Error: No node of given name")
+    #nodes = nodes.pop(end_node)
+    #nodes.insert(0, nodes.pop(nodes.index(start_node)))
+    queue = [start_node]
+    paths = [[start_node]]
+    while queue:
+        current_node = queue[0]
+        #Handling exepction
+        if connections.get(current_node) == None:
+            visited.append(queue.pop(0))
+            continue
+        for i in connections[current_node]:
+            if i not in visited or queue:
+                visited.append(i)
+                queue.append(i)
+                #Saving possible paths
+                if findParent(paths, current_node) != None:
+                    parent_path = paths.pop(findParent(paths, current_node))
+                    if len(connections[current_node]) > 1:
+                        for j in connections[current_node]:
+                            #X D!
+                            temp = parent_path.copy()
+                            temp.append(j)
+                            if j == end_node:
+                                return temp
+                            paths.append(temp) 
+                    else:
+                        temp = parent_path.copy()
+                        temp.append(i) 
+                        if i == end_node:
+                                return temp
+                        paths.append(temp)
+        queue.pop(0)
+
+    return None
+
+def findParent(paths, parent):
+    p_index = None
+    for i in paths:
+        if i[-1] == parent:
+            p_index = paths.index(i)
+            return p_index
+    return None
+
 
 if __name__ == "__main__":
-    """
-    tree = list()
-    tree.append({1,2,4})
-    tree.append({0,5,7,8})
-    tree.append({3,5,6})
-    node2 = 3
-    _set = [node2 in x for x in tree]
-    if True in _set:
-        ind = _set.index(True)
-        print(ind)
-        tree[0] = tree[0].union(tree[ind])
-    print(tree[0])
-    """
     G = WeightedGraph(None)
-    G.create_node("A")
-    G.create_node("B")
-    G.create_node("C")
-    G.create_node("D")
-    G.create_node("E")
-    G.create_node("F")
-    G.create_node("G")
+    nodes = ["A", "B", "C", "D", "E", "F", "G"]
+    for i in nodes:
+        G.create_node(i)
+        
     G.create_connection(7, "A","B")
     G.create_connection(5, "A","D")
     G.create_connection(8, "B","C")
@@ -219,13 +309,9 @@ if __name__ == "__main__":
         print("Edges:")
         print([x.__name__ for x in B.__edges__])
 
-    if True:
+    if False:
         Dijkstra(G, "A")
 
-    #findMin({"A": 10, "B": 1, "C": 2}, ["B"])
+    if False: 
+        FordFulkerson(G, 'A', 'F')
 
-#1. stworzenie grafu który ma takie same krawędzie, węzły ale nie połączenia 
-#2. posortowanie krawędzi 
-#3 funkcja, check if no cycle 
-#4 dodanie lub nie krawędzi
-#5 przejście do kolejnej krawędzi 
